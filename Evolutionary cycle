@@ -1,0 +1,99 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --- DTM & Cyclic Constants ---
+PLANCK_LENGTH = 1.0       # Normalized scale factor minimum for simulation
+CRITICAL_DENSITY = 50.0   # Density threshold (rho_c) for dimensional collapse
+BOUNCE_RATE = 2.5         # Outflow momentum post-bounce
+
+class CyclicAeonSimulation:
+    def __init__(self, grid_size=15, time_steps=200):
+        """Initializes a 1+3D tensor grid for the universe lifecycle."""
+        self.grid_size = grid_size
+        self.time_steps = time_steps
+        
+        # 1+3D Arrays: [Time, X, Y, Z]
+        self.scale_factor = np.zeros((time_steps, grid_size, grid_size, grid_size))
+        self.density = np.zeros((time_steps, grid_size, grid_size, grid_size))
+        
+        # Tracks local dimensions (Starts at 3 for 1+3D space)
+        self.dimensionality = np.full((time_steps, grid_size, grid_size, grid_size), 3)
+        
+        # Timeline: -T (Contraction) to 0 (Bounce) to +T (Daughter Aeon)
+        self.t_array = np.linspace(-3, 3, time_steps)
+
+    def generate_quantum_fluctuations(self):
+        """Creates minor density anomalies so the 3D space is non-uniform."""
+        return np.random.normal(1.0, 0.15, (self.grid_size, self.grid_size, self.grid_size))
+
+    def evolve_spacetime(self):
+        """Runs the 1+3D simulation across the cyclic timeline."""
+        fluctuations = self.generate_quantum_fluctuations()
+        
+        for t_idx, t in enumerate(self.t_array):
+            # 1. Baseline Scale Factor with a Quantum Bounce 
+            # Equation: a(t) = sqrt(ell_P^2 + (k*t)^2)
+            base_a = np.sqrt(PLANCK_LENGTH**2 + (BOUNCE_RATE * t)**2)
+            
+            # Apply base scale to the 3D grid with local quantum fluctuations
+            self.scale_factor[t_idx] = base_a * fluctuations
+            
+            # 2. Calculate Local Density
+            # Volume V ~ a^D. We determine density based on the previous step's dimensionality
+            if t_idx > 0:
+                prev_dim = self.dimensionality[t_idx - 1]
+            else:
+                prev_dim = np.full((self.grid_size, self.grid_size, self.grid_size), 3)
+            
+            # Density spikes as scale factor drops. (+ 1e-8 prevents division by zero)
+            local_volume = self.scale_factor[t_idx] ** prev_dim
+            self.density[t_idx] = 100.0 / (local_volume + 1e-8) 
+            
+            # 3. Apply Damascus Postulate: Dimensional Collapse & Recombination
+            # Check where local density exceeds the critical threshold
+            collapse_mask = self.density[t_idx] > CRITICAL_DENSITY
+            
+            # If threshold is met, space compactifies to 1D. If not, it unfolds/remains 3D.
+            self.dimensionality[t_idx] = np.where(collapse_mask, 1, 3)
+
+    def plot_evolution(self):
+        """Visualizes the mean state of the 3D universe over time."""
+        # Average the 3D spatial grids to plot the universal timeline
+        mean_scale = np.mean(self.scale_factor, axis=(1, 2, 3))
+        mean_density = np.mean(self.density, axis=(1, 2, 3))
+        mean_dim = np.mean(self.dimensionality, axis=(1, 2, 3))
+        
+        fig, axs = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
+        
+        # Plot Scale Factor (The Bounce)
+        axs[0].plot(self.t_array, mean_scale, color='blue', lw=3)
+        axs[0].set_ylabel("Scale Factor a(t)")
+        axs[0].set_title("Universe Scale (Contraction -> Bounce -> Expansion)")
+        axs[0].grid(True)
+        
+        # Plot Density
+        axs[1].plot(self.t_array, mean_density, color='red', lw=3)
+        axs[1].axhline(CRITICAL_DENSITY, color='black', linestyle='--', label="Damascus Threshold")
+        axs[1].set_ylabel("Density ρ(t)")
+        axs[1].set_title("Energy Density")
+        axs[1].legend()
+        axs[1].grid(True)
+        
+        # Plot Dimensionality
+        axs[2].plot(self.t_array, mean_dim, color='purple', lw=3)
+        axs[2].set_ylabel("Dimensions (1 to 3)")
+        axs[2].set_xlabel("Time (t) -> 0 is the Bounce")
+        axs[2].set_title("Spacetime Dimensionality (Compactification & Recombination)")
+        axs[2].grid(True)
+        
+        plt.tight_layout()
+        plt.show()
+
+# --- Execution ---
+if __name__ == "__main__":
+    # Create a 15x15x15 universe spanning 200 time steps
+    sim = CyclicAeonSimulation(grid_size=15, time_steps=200)
+    sim.evolve_spacetime()
+    
+    # Render the timeline of the cyclic transition
+    sim.plot_evolution()
