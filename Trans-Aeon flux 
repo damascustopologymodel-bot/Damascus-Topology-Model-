@@ -1,0 +1,55 @@
+import math
+import time
+
+def simulate_dtm_transition():
+    # Model Parameters
+    ell_p = 1.616e-35  # Planck length (meters)
+    k_valve = 0.00028  # Aperture scale for topological throttle
+    beta = 3.5         # Compaction density
+    c = 3.0e8          # Speed of light (m/s) as a scaling factor
+    
+    print("=====================================================")
+    print("  DAMASCUS TOPOLOGY MODEL: TRANS-AEON SIMULATION")
+    print("=====================================================\n")
+    time.sleep(1)
+
+    # Time array: from t = -5 (Parent Aeon Infall) to t = +5 (Daughter Aeon)
+    # Scaled arbitrarily for the sake of a simplistic step-by-step model
+    time_steps = [t * 0.5 for t in range(-10, 11)]
+    
+    for t in time_steps:
+        # 1. Calculate Spacetime Radius (Hyperbolic Halt)
+        # Prevents standard singularity by terminating strictly at the Planck boundary
+        radius = math.sqrt(ell_p**2 + (c * t)**2)
+        
+        # 2. Calculate Trans-Aeon Flux Coefficient (F_aeon)
+        # Approaches 1.0 (unity) precisely as t -> 0
+        flux_coeff = math.exp(-(t**2) / 0.5)
+        
+        # Determine the current phase based on time
+        if t < -0.5:
+            phase = "PHASE 1: Kerr-Metric Collapse (Infalling Matter)"
+            throttle_status = "Inactive"
+        elif -0.5 <= t <= 0.5:
+            phase = "PHASE 2: Trans-Aeon Anomaly (100% Perfect Annihilation)"
+            throttle_status = "Maximized (Energy Pumping)"
+        else:
+            phase = "PHASE 3: Daughter Aeon Expansion"
+            # Simulating the high-pass filter effect on a test spatial frequency (k = 0.0001)
+            k_test = 0.0001
+            throttle_transmission = 1 / (1 + (k_valve / k_test)**beta)
+            throttle_status = f"Active (Transmission suppressed to {throttle_transmission:.4f})"
+
+        # Output the mathematical state to the console
+        print(f"Time (t): {t:>5.1f} | Radius: {radius:>12.2e} m | F_aeon: {flux_coeff:>6.4f}")
+        print(f"State   : {phase}")
+        print(f"Valve   : {throttle_status}")
+        print("-" * 53)
+        
+        # Pause slightly so you can watch the simulation run
+        time.sleep(0.4)
+
+    print("\nSimulation Complete. Energy successfully transferred to Daughter Aeon.")
+
+if __name__ == "__main__":
+    simulate_dtm_transition()
